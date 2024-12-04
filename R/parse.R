@@ -30,7 +30,7 @@ parse_md_to_csv <- function(filename) {
     # Sort rows by the order of sections
     df_parsed <- df_parsed[match(sections, df_parsed$heading), ]
     # Clean up the text by removing markdown comments and trimming whitespace
-    df_parsed$text <- rm_md_comments(trimws(df_parsed$text))  
+    df_parsed$text <- trimws(rm_md_comments(df_parsed$text) )
     # Convert to wide format with headings as column names
     result <- parsermd::as_tibble(stats::setNames(as.list(df_parsed$text), df_parsed$heading))
     result[, which(result == "NA")] <- NA
