@@ -42,7 +42,7 @@ validate_answeroption <- function(x) {
         cli::cli_alert_success("Input for variable {.field answeroption_06} correct.")
         return(TRUE)
     } else if(check == "text_false") {
-        cli::cli_alert_danger("Input for variable {.field answeroption_06} incorrect. Should have the following value based on variable {.field type_answer} = {.str {x$type_answer}}: {.str Frage uberspringen}")
+        cli::cli_alert_danger("Input for variable {.field answeroption_06} incorrect. Should have the following value based on variable {.field type_answer} = {.str {x$type_answer}}: {.str Frage \u00FCberspringen}")
         return(FALSE)
     } else if(check == "image_false") {
         cli::cli_alert_danger("Input for variable {.field answeroption_06} incorrect. Based on variable {.field type_answer} = {.str {x$type_answer}}, it should have the following value: {.str www/skip.png}")
