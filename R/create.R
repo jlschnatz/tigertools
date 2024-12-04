@@ -59,6 +59,5 @@ create_item <- function(item_folder = "items", open = TRUE, r_file = NULL) {
 }
 
 
-tools::showNonASCIIfile("R/validate.R")
 
 

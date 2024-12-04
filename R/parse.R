@@ -55,6 +55,3 @@ parse_csv_to_md <- function(x, item_folder = "items") {
     }
     cli::cli_alert_success("Successfully transferred data frame to .md files, see: {.file {file.path(getwd(), item_folder)}}")
 }
-
-
-usethis::use_git()
