@@ -126,8 +126,3 @@ validate_item <- function(filename) {
     v6 <- validate_if_answeroption(x)
     if(any(!unname(unlist(list(v1, v2, v3, v4, v5, v6))))) cli::cli_abort("Some requirements are not met, please check the messages")
 }
-
-
-
-skeleton <- readLines("skeleton.md")
-usethis::use_data(skeleton, internal = TRUE, overwrite = TRUE)
