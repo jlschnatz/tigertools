@@ -106,7 +106,7 @@ validate_str <- function(x, var, valid, dist_len) {
 #' @param filename The filename of the md-file of the item
 validate_item <- function(filename) {
     valid_names <- list(
-        learning_area = c('Deskriptivstatistik', 'Grundlagen der Inferenzstatistik', 'Wahrscheinlichkeit', 'Zusammenhangsma\U00DF', 'Regression', 'Poweranalyse', 'Gruppenvergleiche'),
+        learning_area = c('Deskriptivstatistik', 'Grundlagen der Inferenzstatistik', 'Wahrscheinlichkeit', paste0("Zusammenhangsma", "\u00df", "e"), 'Regression', 'Poweranalyse', 'Gruppenvergleiche'),
         type_item = c('content', 'coding'),
         bloom_taxonomy = c('knowledge', 'comprehension', 'application'),
         theo_diff = c('easy', 'medium', 'hard'),
