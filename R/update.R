@@ -13,6 +13,7 @@ update_db <- function(md_file, item_folder = "items", csv_file = "data_item_tige
     cli::cli_alert_info("Neue CSV-Datei beschrieben, siehe {.file {normalizePath(csv_file)}}")
     con <- DBI::dbConnect(drv = RSQLite::SQLite(), sqlite_file)
     DBI::dbWriteTable(con, "item_db", df_item, overwrite = TRUE)
+    DBI::dbDisconnect(con)
     cli::cli_alert_info("Data was written to database, see {.file {normalizePath(sqlite_file)}}")
     cli::cli_alert_success("Fertig!")
 }
