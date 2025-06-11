@@ -39,10 +39,33 @@ push <- function(file, overwrite = FALSE, confirm = TRUE) {
 
   # Add new item and write to CSV + DB
   df_updated <- .add_and_sort(df_existing, df_new)
-  .update_storage(df_updated)
+  .write_to_storage(df_updated)
 
   cli::cli_alert_success("Item with id {.val {id_new}} processed successfully.")
 }
+
+
+#' @keywords internal
+.remove_item_by_id <- function(df, id) df[df$id_item != id, ]
+
+#' @keywords internal
+.add_and_sort <- function(df_existing, df_new) {
+  df_combined <- rbind(df_existing, df_new)
+  df_combined[order(df_combined$id_item), ]
+}
+
+#' @keywords internal
+.write_to_storage <- function(df) {
+  readr::write_csv(df, "./data_item_tiger.csv")
+  cli::cli_alert_info("CSV updated: {.file {normalizePath('./data_item_tiger.csv')}}")
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), "./db_item.sqlite")
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
+
+  DBI::dbWriteTable(con, "item_db", df, overwrite = TRUE)
+  cli::cli_alert_info("SQLite DB updated: {.file {normalizePath('./db_item.sqlite')}}")
+}
+
 
 #' @title Push all items in a directory
 #' @description Pushes all markdown files in a directory to the database.
