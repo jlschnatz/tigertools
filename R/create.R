@@ -1,12 +1,9 @@
-#' @title Create a new Item from the Markdown Template
-#' @param item_folder The folder where the new item should be created. Defaults to "items".
-#' @param open Whether to open the newly created file. Logical vector.
-#' @param r_file Filename of an R-file (defaults to NULL).
-#' @return Creates a new file based on the Markdown-Template with prefilled `id_item`.
-#' @export 
-create_item <- function(item_folder = "items", open = TRUE, r_file = NULL) {
-    # Current wd must be where .Rproj file is located
-    if(!any(grepl("\\.Rproj$", dir(getwd()), ignore.case = TRUE))) {
+#' @title Check Folder Structure
+#' @description Checks if the current working directory is the correct folder structure for the project.
+#' @details The current working directory should contain the `.Rproj` file and the `items` folder.
+#' @return Throws an error if the folder structure is not correct.
+check_folderstruct <- function() {
+    if (!any(grepl("\\.Rproj$", dir(getwd()), ignore.case = TRUE))) {
         msg <- c(
             "Youre current working directory is not located in the correct folder", 
             "It should be the folder where the .Rproj-file is located.", 
@@ -14,13 +11,25 @@ create_item <- function(item_folder = "items", open = TRUE, r_file = NULL) {
         )
         cli::cli_abort(paste0(msg, collapse = " "))
     }
-    # Ensure the folder exists
-    item_folder_path <- file.path(getwd(), item_folder)
-    if (!dir.exists(item_folder_path)) {
-        msg <- "Specified directory in argument {.field item_folder} does not exist. Please create this folder."
+
+    if( !dir.exists("items")) {
+        msg <- "The folder {.field items} does not exist in the current working directory. Please ensure you are in the correct project folder."
         cli::cli_abort(msg)
     }
-    
+}
+
+#' @title Create a new Item from the Markdown Template
+#' @param item_folder The folder where the new item should be created. Defaults to "items".
+#' @param open Whether to open the newly created file. Logical vector.
+#' @param r_file Filename of an R-file (defaults to NULL).
+#' @return Creates a new file based on the Markdown-Template with prefilled `id_item`.
+#' @export 
+create <- function(open = TRUE, r_file = NULL) {
+    item_folder <- "items" # Default folder for items
+    # Current wd must be where .Rproj file is located and where the items folder is located
+    check_folderstruct()
+
+    item_folder_path <- file.path(getwd(), item_folder)
     # Determine the next item number
     existing_files <- dir(item_folder_path, pattern = "tiger_item_\\d+\\.md", full.names = FALSE)
     if (length(existing_files) == 0) {
@@ -29,7 +38,7 @@ create_item <- function(item_folder = "items", open = TRUE, r_file = NULL) {
         max_digit_exist <- max(as.numeric(sub("tiger_item_(\\d*)\\.md", "\\1", existing_files)), na.rm = TRUE)
     }
    
-    ## Create the new markdown file
+    # Create the new markdown file from template
     md_filename <- sprintf("%s/tiger_item_%03d.md", item_folder_path, max_digit_exist + 1)
     writeLines(skeleton, md_filename)
     item_txt <- readLines(md_filename, warn = FALSE)
