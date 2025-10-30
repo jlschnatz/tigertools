@@ -1,3 +1,7 @@
 ^tigertools\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^\.Rhistory$
+^\.RData$
+^\.Rprofile$
+^\.lintr$

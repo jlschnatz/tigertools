@@ -1,26 +1,43 @@
 #' @noRd 
 validate_id_item <- function(x) {
     x <- suppressWarnings(as.integer(x))
-    if(!is.integer(x) | x <= 0 | is.na(x)) {
+    if (!is.integer(x) || x <= 0 || is.na(x)) {
         cli::cli_alert_danger("The value for the variable {.field id_item} must be a positive integer.")
-        return(FALSE)
+        FALSE
     } else {
         cli::cli_alert_success("Input for variable {.field id_item correct.}")
-        return(TRUE)
+        TRUE
     }
 }
 
 #' @noRd 
-is_img_path <- function(path) {
-  img_regex <- "\\.(jpg|jpeg|png|gif|bmp|tiff|webp)$"
-  grepl(img_regex, path, ignore.case = TRUE)
+is_valid_img_path <- function(path) {
+    img_regex <- "^www/.*\\.(jpg|jpeg|png|gif|bmp|tiff|webp)$"
+    if(length(path) > 1) {
+        cli::cli_alert_danger("Muliple image paths in a single field detected. Only one image path is allowed.")
+        return(FALSE)
+    }
+
+    if(!grepl(img_regex, path, ignore.case = TRUE)) {
+        cli::cli_alert_danger("Invalid naming scheme for image path. The path must start with {.emph www/} and end with a valid image file extension (e.g., .jpg, .png, .bmp, .tiff).")
+        return(FALSE)
+    }
+
+    if(!file.exists(path)) {
+        cli::cli_alert_danger("The image file does not exist. Please check the path.")
+        return(FALSE)
+    }
+
+    cli::cli_alert_success("The image path is valid.")
 }
+
 
 #' @noRd 
 validate_stimulus_image <- function(x) {
     if(!is.na(x$stimulus_image)) {
-        if(!is_img_path(x$stimulus_image)) {
-            cli::cli_alert_danger("Input for variable {.field stimulus_image} is not a path with image.")
+        is_valid <- is_valid_img_path(x$stimulus_image)
+        if(!is_valid_img_path(x$stimulus_image)) {
+            cli::cli_alert_danger("Input for variable {.field stimulus_image} must start with {.emph www/} and end with a valid image file extension (e.g., .jpg, .png, .bmp, .tiff). For instance: {.str www/image.png}.")
             return(FALSE)
         } else {
             cli::cli_alert_success("Input for variable {.field stimulus_image} correct.")
@@ -29,9 +46,18 @@ validate_stimulus_image <- function(x) {
     }
 }
 
+validate_answeroption <- function(x) {
+    # if type_anwer = "image"
+    if(x$type_answer == "image") {
+        ansopt_nms <- paste0("answeroption_0", seq_len(5))
+        lapply(x[, ansopt_nms],)
+
+
+    }
+}
+
 #' @noRd 
 validate_answeroption <- function(x) {
-    type_answer <- x$type_answer
     check <- dplyr::case_when(
         x$type_answer == "text" & x$answeroption_06 == "Frage \u00FCberspringen." ~ "correct",
         x$type_answer == "text" & x$answeroption_06 != "Frage \u00FCberspringen." ~ "text_false",
@@ -90,7 +116,8 @@ validate_str <- function(x, var, valid, dist_len) {
         str_dist <- stringdist::stringdist(valid, x, method = "lv")
         if(min(str_dist) < dist_len) {
             nearest_match <- which.min(str_dist)
-            cli::cli_alert_danger(c("Invalid input for variable {.field {var}}: {.arg {x}}.", "Must be one of these categories: {.arg {valid}}.", "Did you mean {.arg {valid[nearest_match ]}}?"))
+            nm_valid <- valid[nearest_match] # nolint
+            cli::cli_alert_danger(c("Invalid input for variable {.field {var}}: {.arg {x}}.", "Must be one of these categories: {.arg {valid}}.", "Did you mean {.arg {nm_valid}}?"))
             return(FALSE)
         } else {
             cli::cli_alert_danger("Invalid input for variable {.field {var}}: {.arg {x}}. Must be one of these categories: {.arg {valid}}")
@@ -101,6 +128,19 @@ validate_str <- function(x, var, valid, dist_len) {
         return(TRUE)
     }
 }
+
+
+#' @noRd
+validate_file_header <- function(filename) {
+    # read lines until the first header (# id_item)
+    lines <- readLines(filename)
+    header_line <- grep("^# id_item", lines)
+    empty <- all(lines[seq_len(header_line) - 1] == "") 
+    if(!empty) cli::cli_abort("The header of the file seems to contain some text. Please remove all lines before the {.field # id_item} header.")
+}
+
+
+
 
 #' @title Validate a newly created item for correct adherence to formatting
 #' @param filename The filename of the md-file of the item
@@ -113,6 +153,7 @@ validate_item <- function(filename) {
         type_stimulus = c('text', 'image'),
         type_answer = c('text', 'image')
     )
+    validate_file_header(filename)
     x <- parse_md_to_csv(filename)
     v1 <- validate_id_item(x$id_item)
     v2 <- vector(mode = "list", length = length(names(valid_names)))
