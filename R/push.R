@@ -114,11 +114,3 @@ push_recent <- function() {
   cli::cli_alert_success("Recent items pushed successfully.")
   invisible()
 }
-
-
-
-
-
-
-
- 
