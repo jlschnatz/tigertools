@@ -10,8 +10,10 @@ rm_md_comments <- function(x) {
 #' @param filename The input filename of the Markdown file.
 #' @return A data frame containing parsed sections in tidy format.
 parse_md_to_csv <- function(filename) {
+    lines <- readLines(filename) 
+    lines <- trimws(lines)
     # Parse the markdown file
-    parsed_txt <- parsermd::parse_rmd(filename)
+    parsed_txt <- parsermd::parse_rmd(lines)
     # Extract unique sections
     sections <- unique(stats::na.omit(unlist(parsermd::rmd_node_sections(parsed_txt))))
     # Convert parsed text to a data frame

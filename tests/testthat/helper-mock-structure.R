@@ -1,19 +1,8 @@
-#' @title Mock Structure for Testing
-create_mock_structure <- function() {
+# This helper function creates a mock package structure for testing purposes.
+create_mockstruct <- function() {
   root <- tempfile("mockpkg_")
   dir.create(root)
-  
-  # Create folder structure
-  dir.create(file.path(root, "items", "www"), recursive = TRUE)
-  
-  # Create required files
+  unzip("testdata/mock.zip", exdir = root)
   file.create(file.path(root, ".Rproj"))
-  file.create(file.path(root, "items", "test.md"))
-  writeLines(test_md_content, file.path(root, "items", "test.md"))
-  
   return(root)
 }
-
-
-
-

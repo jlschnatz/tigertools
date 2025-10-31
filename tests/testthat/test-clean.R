@@ -3,7 +3,7 @@ test_that("Remove non .md-files works!", {
   dir.create(file.path(tmp_dir, "items"))
   files <- c("tiger_item_001.md", "tiger_item_001.html")
   file.create(file.path(tmp_dir, "items", files))
-  clean(file.path(tmp_dir, "items"))
+  suppressMessages(clean(file.path(tmp_dir, "items")))
   expect_false(file.exists(file.path(tmp_dir, "items", "tiger_item_001.html")))
   expect_true(file.exists(file.path(tmp_dir, "items", "tiger_item_001.md")))
   unlink(file.path(tmp_dir, "items"), recursive = TRUE)

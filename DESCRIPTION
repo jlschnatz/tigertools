@@ -19,6 +19,7 @@ Imports:
     here,
     noah,
     parsermd,
+    purrr,
     readr,
     rlang,
     RSQLite,

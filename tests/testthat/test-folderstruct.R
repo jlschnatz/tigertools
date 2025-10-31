@@ -1,5 +1,5 @@
 test_that("Correct folder structure.", {
-  root <- create_mock_structure()
+  root <- create_mockstruct()
   setwd(root)
   expect_true(file.exists(".Rproj"))
   file.remove(".Rproj")

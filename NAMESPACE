@@ -2,4 +2,5 @@
 
 export(create)
 export(generate_users)
+export(push_recent)
 export(update_db)

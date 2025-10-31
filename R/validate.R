@@ -1,3 +1,36 @@
+#' @noRd
+is_empty <- function(x, first.only = TRUE, all.na.empty = TRUE) {
+  # do we have a valid vector?
+  if (!is.null(x)) {
+    # if it's a character, check if we have only one element in that vector
+    if (is.character(x)) {
+      # characters may also be of length 0
+      if (length(x) == 0) return(TRUE)
+      # else, check all elements of x
+      zero_len <- nchar(x) == 0
+      # return result for multiple elements of character vector
+      if (first.only) {
+        zero_len <- .is_true(zero_len[1])
+        if (length(x) > 0) x <- x[1]
+      } else {
+        return(unname(zero_len))
+      }
+      # we have a non-character vector here. check for length
+    } else if (is.list(x)) {
+      x <- purrr::compact(x)
+      zero_len <- length(x) == 0
+    } else {
+      zero_len <- length(x) == 0
+    }
+  }
+
+  any(is.null(x) || zero_len || (all.na.empty && all(is.na(x))))
+}
+
+.is_true <- function(x) {
+  is.logical(x) && length(x) == 1L && !is.na(x) && x
+}
+
 #' @noRd 
 validate_id_item <- function(x) {
     x <- suppressWarnings(as.integer(x))
@@ -29,14 +62,15 @@ is_valid_img_path <- function(path) {
     }
 
     cli::cli_alert_success("The image path is valid.")
+    return(TRUE)
 }
 
 
 #' @noRd 
 validate_stimulus_image <- function(x) {
-    if(!is.na(x$stimulus_image)) {
+    if(!is.na(x$stimulus_image) && x$stimulus_image != "") {
         is_valid <- is_valid_img_path(x$stimulus_image)
-        if(!is_valid_img_path(x$stimulus_image)) {
+        if(!is_valid) {
             cli::cli_alert_danger("Input for variable {.field stimulus_image} must start with {.emph www/} and end with a valid image file extension (e.g., .jpg, .png, .bmp, .tiff). For instance: {.str www/image.png}.")
             return(FALSE)
         } else {
@@ -99,8 +133,8 @@ validate_if_answeroption <- function(x) {
         cli::cli_alert_success("Input for variable {.field if_answeroptions_06} corresponds to formalities.")
     }
 
-    n_answer <- sum(!is.na(unlist(x[, paste0("answeroption_0", 1:5)])))
-    n_if_answer <- sum(!is.na(unlist(x[, paste0("if_answeroption_0", 1:5)])))
+    n_answer <- sum(sapply( unlist(x[, paste0("answeroption_0", 1:5)]), function(x) !is_empty(x)))
+    n_if_answer <- sum(sapply( unlist(x[, paste0("if_answeroption_0", 1:5)]), function(x) !is_empty(x)))
     if(n_answer != n_if_answer) {
         cli::cli_alert_danger("{n_answer} fields for {.field answer_option} have been filled out, but {n_if_answer} fields for {.field if_answeroption}. These must be identical!")
         return(FALSE)
@@ -166,4 +200,5 @@ validate_item <- function(filename) {
     v5 <- validate_answer_correct(x)
     v6 <- validate_if_answeroption(x)
     if(any(!unname(unlist(list(v1, v2, v3, v4, v5, v6))))) cli::cli_abort("Some requirements are not met, please check the messages")
+    return(TRUE)
 }

@@ -17,7 +17,7 @@ Nachdem das Paket geladen wurde, können dessen Funktionen verwendet werden, um 
 
 **Übersicht**:
 
-1.  *Schritt 1*: Neues Item generieren Erstelle ein neues Item mit der Funktion `create_item()` aus dem Paket tigertools:
+1.  *Schritt 1*: Neues Item generieren Erstelle ein neues Item mit der Funktion `create()` aus dem Paket tigertools:
 
 2.  *Schritt 2*: Datei bearbeiten Bearbeite die generierte Markdown-Datei gemäß den Template-Vorgaben. Falls eine zusätzliche R-Datei erstellt wurde (z. B. für Daten-Simulationen), passe diese ebenfalls an.
 
@@ -30,10 +30,10 @@ Nachdem das Paket geladen wurde, können dessen Funktionen verwendet werden, um 
 
 ### Schritt 1: Erstellen der Datei
 
-Ein neues Item kannst du mit der Funktion create_item() erstellen:
+Ein neues Item kannst du mit der Funktion create() erstellen:
 
 ``` r
-create_item(item_folder = "items", open = TRUE, r_file = NULL)
+create(item_folder = "items", open = TRUE, r_file = NULL)
 ```
 
 Argumente: - `item_folder` (default: "items") Gibt den Dateipfad an, in dem die Markdown-Dateien der Items gespeichert werden. Der Standardwert sollte in der Regel nicht geändert werden.
