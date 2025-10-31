@@ -45,7 +45,8 @@ validate_id_item <- function(x) {
 
 #' @noRd 
 is_valid_img_path <- function(path) {
-    img_regex <- "^www/.*\\.(jpg|jpeg|png|gif|bmp|tiff|webp)$"
+    path <- file.path("items", path)
+    img_regex <- "^items/www/.*\\.(jpg|jpeg|png|gif|bmp|tiff|webp)$"
     if(length(path) > 1) {
         cli::cli_alert_danger("Muliple image paths in a single field detected. Only one image path is allowed.")
         return(FALSE)
