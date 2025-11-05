@@ -17,11 +17,13 @@ parse_md_to_csv <- function(filename) {
     # Extract unique sections
     sections <- unique(stats::na.omit(unlist(parsermd::rmd_node_sections(parsed_txt))))
     # Convert parsed text to a data frame
-    df_parsed <- as.data.frame(parsed_txt)   
+    #df_parsed <- as.data.frame(parsed_txt) 
+    df_parsed <- parsermd::as_tibble(parsed_txt)  
     # Filter rows where type is "rmd_markdown"
     df_parsed <- df_parsed[df_parsed$type == "rmd_markdown", ]  
     # Combine the 'ast' field (list of character vectors) into a single string
-    df_parsed$ast <- sapply(df_parsed$ast, function(x) paste(x, collapse = "\n"))
+    #df_parsed$ast <- sapply(df_parsed$ast, function(x) paste(x, collapse = "\n"))
+    df_parsed$ast <- sapply(df_parsed$ast, function(x) paste(x@lines, collapse = "\n"))
     # Select only the relevant columns: 'sec_h1' (heading) and 'ast' (text)
     df_parsed <- df_parsed[, c("sec_h1", "ast")]
     colnames(df_parsed) <- c("heading", "text") 

@@ -4,6 +4,7 @@
 #' @param file Path to the markdown file
 #' @param overwrite Logical, whether to overwrite an existing item (default: FALSE)
 #' @param confirm Logical, whether to prompt user interactively (default: TRUE)
+#' @export 
 push <- function(file, overwrite = FALSE, confirm = TRUE) {
   # Ensure correct working directory and file validity
   check_folderstruct()
@@ -72,6 +73,7 @@ push <- function(file, overwrite = FALSE, confirm = TRUE) {
 #' If overwrite = TRUE, all existing items will be overwritten without confirmation.
 #' @param path Path to directory with markdown files (default: "./items")
 #' @param overwrite Logical, whether to overwrite existing items (default: FALSE)
+#' @export
 push_all <- function(path = "./items", overwrite = FALSE) {
   check_folderstruct()
   files <- list.files(path, pattern = "\\.md$", full.names = TRUE)
