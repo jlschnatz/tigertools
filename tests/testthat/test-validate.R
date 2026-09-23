@@ -73,3 +73,38 @@ test_that(".add_and_sort() aligns differing columns and sorts by id", {
   expect_equal(out$extra, c("b", NA, "a"))
   expect_equal(out$answer_mode, c(NA, "num", NA))
 })
+
+# ── Parsing ───────────────────────────────────────────────────────────────────
+
+test_that("parse_md_to_csv() keeps text after fenced code blocks (regression: item 97)", {
+  f <- write_item_md(mc_item_fields(stimulus_text = paste(
+    "Lies die Daten ein:",
+    "```",
+    "income <- carData::Salaries",
+    "# ein R-Kommentar, keine Überschrift",
+    "  eingerückt()",
+    "```",
+    "Danach folgt **mehr Text**.",
+    "~~~",
+    "t.test(income$salary, income$sex)",
+    "~~~",
+    "Woran hat es gelegen?",
+    sep = "\n"
+  )))
+  x <- parse_md_to_csv(f)
+  s <- x$stimulus_text
+  expect_match(s, "Danach folgt **mehr Text**.", fixed = TRUE)
+  expect_match(s, "Woran hat es gelegen?", fixed = TRUE)
+  expect_match(s, "# ein R-Kommentar, keine Überschrift", fixed = TRUE)
+  expect_match(s, "\n  eingerückt()\n", fixed = TRUE) # indentation inside code kept
+  expect_match(s, "t.test(income$salary, income$sex)", fixed = TRUE)
+  expect_false("ein R-Kommentar, keine Überschrift" %in% names(x))
+  expect_true(suppressMessages(validate_item(f)))
+})
+
+test_that("parse_md_to_csv() maps empty and 'NA' sections to NA and drops comments", {
+  f <- write_item_md(mc_item_fields(stimulus_image = "NA", answeroption_05 = "<!-- nur ein Kommentar -->"))
+  x <- parse_md_to_csv(f)
+  expect_true(is.na(x$stimulus_image))
+  expect_true(is.na(x$answeroption_05))
+})

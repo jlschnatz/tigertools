@@ -17,7 +17,6 @@ Imports:
     DBI,
     here,
     noah,
-    parsermd (>= 0.2.0),
     readr,
     rlang,
     RSQLite,

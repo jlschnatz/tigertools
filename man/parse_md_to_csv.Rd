@@ -10,8 +10,15 @@ parse_md_to_csv(filename)
 \item{filename}{The input filename of the Markdown file.}
 }
 \value{
-A data frame containing parsed sections in tidy format.
+A one-row tibble with one character column per section, in file
+order; a section that is empty or \code{NA} is \code{NA}. If a heading occurs
+twice, the first one wins (validate_item() reports duplicates).
 }
 \description{
-Parse Markdown to DataFrame
+Splits an item file into its \verb{# field} sections: each section's
+value is everything between its heading and the next one, with markdown
+comments removed and surrounding whitespace trimmed. Fenced code blocks
+(\verb{```} or \verb{~~~}) are kept verbatim as part of the section,
+including indentation inside them, and \verb{#} lines inside them (R comments)
+are not treated as headings.
 }

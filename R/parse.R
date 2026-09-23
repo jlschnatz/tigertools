@@ -7,38 +7,37 @@ rm_md_comments <- function(x) {
 }
 
 #' @title Parse Markdown to DataFrame
+#' @description Splits an item file into its `# field` sections: each section's
+#'   value is everything between its heading and the next one, with markdown
+#'   comments removed and surrounding whitespace trimmed. Fenced code blocks
+#'   (```` ``` ```` or `~~~`) are kept verbatim as part of the section,
+#'   including indentation inside them, and `#` lines inside them (R comments)
+#'   are not treated as headings.
 #' @param filename The input filename of the Markdown file.
-#' @return A data frame containing parsed sections in tidy format.
+#' @return A one-row tibble with one character column per section, in file
+#'   order; a section that is empty or `NA` is `NA`. If a heading occurs
+#'   twice, the first one wins (validate_item() reports duplicates).
 parse_md_to_csv <- function(filename) {
-    lines <- readLines(filename) 
-    lines <- trimws(lines)
-    # Parse the markdown file
-    parsed_txt <- parsermd::parse_rmd(lines)
-    # Extract unique sections
-    sections <- unique(stats::na.omit(unlist(parsermd::rmd_node_sections(parsed_txt))))
-    # Convert parsed text to a data frame
-    #df_parsed <- as.data.frame(parsed_txt) 
-    df_parsed <- parsermd::as_tibble(parsed_txt)  
-    # Filter rows where type is "rmd_markdown"
-    df_parsed <- df_parsed[df_parsed$type == "rmd_markdown", ]  
-    # Combine the 'ast' field (list of character vectors) into a single string
-    #df_parsed$ast <- sapply(df_parsed$ast, function(x) paste(x, collapse = "\n"))
-    df_parsed$ast <- sapply(df_parsed$ast, function(x) paste(x@lines, collapse = "\n"))
-    # Select only the relevant columns: 'sec_h1' (heading) and 'ast' (text)
-    df_parsed <- df_parsed[, c("sec_h1", "ast")]
-    colnames(df_parsed) <- c("heading", "text") 
-    # Create a data frame for all sections
-    sections_df <- data.frame(heading = sections, stringsAsFactors = FALSE) 
-    # Merge parsed content with the full list of sections
-    df_parsed <- merge(sections_df, df_parsed, by = "heading", all.x = TRUE, sort = FALSE) 
-    # Sort rows by the order of sections
-    df_parsed <- df_parsed[match(sections, df_parsed$heading), ]
-    # Clean up the text by removing markdown comments and trimming whitespace
-    df_parsed$text <- trimws(rm_md_comments(df_parsed$text) )
-    # Convert to wide format with headings as column names
-    result <- parsermd::as_tibble(stats::setNames(as.list(df_parsed$text), df_parsed$heading))
-    result[, which(result == "NA")] <- NA
-    return(result)
+    lines <- sub("\r$", "", readLines(filename, warn = FALSE, encoding = "UTF-8"))
+    is_fence <- grepl("^\\s*(```|~~~)", lines)
+    in_code <- (cumsum(is_fence) %% 2 == 1) & !is_fence
+    # Outside code, lines are trimmed (so indentation can't accidentally turn
+    # text into an indented code block); inside code, indentation is content
+    lines[!in_code] <- trimws(lines[!in_code])
+    is_heading <- !in_code & !is_fence & grepl("^#\\s+\\S", lines)
+
+    starts <- which(is_heading)
+    ends <- c(starts[-1] - 1L, length(lines))
+    headings <- trimws(sub("^#\\s+", "", lines[starts]))
+    texts <- mapply(function(s, e) {
+        body <- if (e > s) lines[(s + 1L):e] else character(0)
+        trimws(rm_md_comments(paste(body, collapse = "\n")))
+    }, starts, ends, USE.NAMES = FALSE)
+
+    keep <- !duplicated(headings)
+    texts <- as.list(texts[keep])
+    texts <- lapply(texts, function(t) if (!nzchar(t) || t == "NA") NA_character_ else t)
+    tibble::as_tibble(stats::setNames(texts, headings[keep]))
 }
 
 #' @title Parse Tidy DataFrame Back to Markdown Without For Loop
