@@ -46,7 +46,7 @@ parse_md_to_csv <- function(filename) {
 #' @param item_folder folder name, where all items are located (defualts to 'items')
 #' @return Writes the reconstructed Markdown to the specified file.
 parse_csv_to_md <- function(x, item_folder = "items") {
-    filename <- sprintf(file.path(item_folder, "tiger_item_%03s.md"), x$id_item)
+    filename <- sprintf(file.path(item_folder, "tiger_item_%03d.md"), as.integer(x$id_item))
     output <- vector(mode = "list", length = nrow(x))
     for(i in seq_len(nrow(x))) {
         output[[i]] <- unlist(mapply(function(section, content) {

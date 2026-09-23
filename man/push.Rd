@@ -14,6 +14,14 @@ push(file, overwrite = FALSE, confirm = TRUE)
 \item{confirm}{Logical, whether to prompt user interactively (default: TRUE)}
 }
 \description{
-Pushes one item (from markdown) to the CSV and SQLite database.
-If the item already exists, it can optionally be overwritten.
+Validates one item (from markdown) and writes it to the CSV and
+SQLite database. If the item already exists, it can optionally be
+overwritten.
+}
+\details{
+The SQLite table is updated in place, never recreated: the item's
+row is updated (or inserted, if new), and columns tigertools doesn't manage
+itself (e.g. \verb{irt_*} parameters added by a later calibration step) are kept
+untouched. Columns of the current item schema that the table is still
+missing (e.g. the numeric-item range bounds) are added.
 }

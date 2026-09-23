@@ -24,5 +24,11 @@ update_db(
 Writes the csv-file and sqlite-file.
 }
 \description{
-Update the sqlite-database and the csv-file containing all items
+Validates one (newly created) item, then rebuilds the CSV from
+all item files and writes them to the SQLite database.
+}
+\details{
+Like \code{\link[=push]{push()}}, the SQLite table is updated in place (rows updated or
+inserted by \code{id_item}), never recreated, so columns tigertools doesn't
+manage itself (e.g. \verb{irt_*}) are kept.
 }

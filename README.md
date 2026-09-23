@@ -1,8 +1,8 @@
-## Das `tigertools`-Pakets
+## Das `tigertools`-Paket
 
-Das tigertools-R-Paket wird verwendet, um neue Items basierend auf einem standardisierten Template zu erstellen und in die bestehende Datenbank einzupflegen.
+Das tigertools-R-Paket wird verwendet, um neue Items für [shinytigeR](https://github.com/jlschnatz/shinytigeR) auf Basis eines standardisierten Markdown-Templates zu erstellen, zu validieren und in die Item-Datenbank (`data_item_tiger.csv` + `db_item.sqlite`) einzupflegen.
 
-**Installation und Laden des Paket** Das Paket kann über die folgende Befehlsfolge installiert und geladen werden:
+**Installation und Laden des Pakets**
 
 ``` r
 # install.packages("remotes") # falls nicht installiert
@@ -10,146 +10,94 @@ remotes::install_github("jlschnatz/tigertools")
 library(tigertools)
 ```
 
-
-Nachdem das Paket geladen wurde, können dessen Funktionen verwendet werden, um Items effizient und konsistent zu erstellen.
+Alle Funktionen setzen voraus, dass das Arbeitsverzeichnis der Ordner des Item-Datenbank-Projekts ist (dort, wo die `.Rproj`-Datei und der Ordner `items/` liegen) — am einfachsten das RStudio-Projekt über die `.Rproj`-Datei öffnen.
 
 ## Workflow
 
-**Übersicht**:
+1.  **Item erstellen** mit `create()` — erzeugt `items/tiger_item_XXX.md` mit der nächsten freien ID.
+2.  **Datei ausfüllen** gemäß den Kommentaren im Template (siehe unten).
+3.  **Validieren und einpflegen** mit `push()` (ein Item), `push_recent()` (alle seit dem letzten Einpflegen geänderten Items) oder `push_all()` (alle Items).
+    -   Jedes Item wird vor dem Schreiben automatisch geprüft. Jede Prüfung meldet ✔ oder ✖; schlägt eine fehl, bricht die Funktion mit einem Fehler ab und nichts wird geschrieben. Das Item überarbeiten und erneut pushen.
 
-1.  *Schritt 1*: Neues Item generieren Erstelle ein neues Item mit der Funktion `create()` aus dem Paket tigertools:
-
-2.  *Schritt 2*: Datei bearbeiten Bearbeite die generierte Markdown-Datei gemäß den Template-Vorgaben. Falls eine zusätzliche R-Datei erstellt wurde (z. B. für Daten-Simulationen), passe diese ebenfalls an.
-
-3.  *Schritt 3*: Überprüfung und Aktualisierung der Datenbank Überprüfe das Item und aktualisiere gleichzeitig die Datenbank mit der Funktion `update_db()`
-
-    -   Validierung: Die Funktion überprüft automatisch, ob das Item korrekt ausgefüllt wurde.
-    -   Fehlerbehandlung: Wenn Fehler auftreten, wird ein entsprechender Error ausgegeben. In diesem Fall muss das Item überarbeitet und der Schritt erneut durchgeführt werden.
-
-4.  *Schritt 4*: Finalisierung Sobald die Überprüfung fehlerfrei abgeschlossen ist, wird das Item automatisch in die Datenbank aufgenommen.
-
-### Schritt 1: Erstellen der Datei
-
-Ein neues Item kannst du mit der Funktion create() erstellen:
+### Schritt 1: Item erstellen
 
 ``` r
-create(item_folder = "items", open = TRUE, r_file = NULL)
+create(open = TRUE, r_file = NULL, answer_mode = "mc")
 ```
 
-Argumente: - `item_folder` (default: "items") Gibt den Dateipfad an, in dem die Markdown-Dateien der Items gespeichert werden. Der Standardwert sollte in der Regel nicht geändert werden.
-
--   `open` (default: TRUE) Bestimmt, ob die erstellte Datei nach der Erstellung automatisch in der verwendeten IDE geöffnet wird.
-
--   `r_file` (default: NULL) Optional: Gibt den Namen einer zusätzlichen R-Datei an, die parallel zur Markdown-Datei erstellt wird. Dies ist relevant, wenn es sich bei der Aufgabe um eine R-Programmieraufgabe handelt, für die ein Datensatz generiert und simuliert werden muss. Diese Datei kann genutzt werden, um den benötigten Datensatz zu erstellen.
-
-**Beispiel**
+-   `answer_mode`: `"mc"` (Standard) für ein Multiple-Choice-Item, `"num"` für ein numerisches Item (Studierende tippen eine Zahl ein). Die beiden Item-Arten haben unterschiedliche Templates.
+-   `open`: Ob die erstellte Datei direkt geöffnet werden soll.
+-   `r_file`: Optional der Name einer zusätzlichen R-Datei in `data-raw/` (z. B. für die Simulation eines Datensatzes bei R-Programmieraufgaben).
 
 ``` r
-#| eval: false
-# Beispiel: Erstellung eines neuen Items, mit R-Datei für Datensatz `therapie`
-create_new_item(open = TRUE, r_file = "therapie.R")
+create(r_file = "therapie.R")          # MC-Item mit R-Datei für einen Datensatz
+create(answer_mode = "num")            # numerisches Item
 ```
 
 ### Schritt 2: Inhalt
 
-Muss nach einem Bestimmten Schema befüllt werden:
+#### Felder für alle Items
 
-#### id_item
+| Feld | Inhalt |
+|---|---|
+| `id_item` | Eindeutige ID, wird von `create()` vorausgefüllt — nicht ändern |
+| `learning_area` | Eines von: `Deskriptivstatistik`, `Wahrscheinlichkeit`, `Grundlagen der Inferenzstatistik`, `Gruppenvergleiche`, `Poweranalyse`, `Zusammenhangsmaße`, `Regression` |
+| `type_item` | `content` (inhaltlich) oder `coding` (R-Code) |
+| `bloom_taxonomy` | `knowledge`, `comprehension` oder `application` |
+| `theo_diff` | Subjektive Schwierigkeit: `easy`, `medium` oder `hard` |
+| `answer_mode` | `mc` oder `num` — vom Template vorgegeben, nicht ändern. (Ältere Item-Dateien ohne dieses Feld gelten als `mc`.) |
+| `stimulus_text` | Aufgabentext; darf Markdown (z. B. Tabellen) und LaTeX (`$...$`) enthalten |
+| `stimulus_image` | Optional: Bildpfad `www/...` (Datei muss in `items/www/` liegen) |
+| `type_stimulus` | `text` oder `image` |
 
--   Eine eineindeutige Kennzeichung für jedes Item
--   Ist automatisch schon angegeben (entspricht dem Dateinamen der Markdowndatei)
--   Muss dadurch auch nicht mehr verändert werden
+#### Multiple-Choice-Items (`answer_mode = mc`)
 
-#### learning_area
+-   `answeroption_01` – `answeroption_05`: Antwortoptionen (Text oder Bildpfad; wenn Bilder, dann für *alle* Optionen). Mindestens 3 sind inhaltlich sinnvoll, maximal 5.
+-   `answeroption_06`: Platzhalter zum Überspringen — `Frage überspringen.` (Text) bzw. `www/skip.png` (Bilder).
+-   `answer_correct`: Nummer der **einen** richtigen Option, z. B. `3`.
+-   `type_answer`: `text` oder `image`.
+-   `if_answeroption_01` – `05`: Feedback je Option (Anzahl muss der Anzahl der Optionen entsprechen); `if_answeroption_06` bleibt unverändert.
 
--   Zuordnung des Item in einen Lernbereich (orientiert an der Vorlesung)
--   Mögliche Kategorien: `Deskriptivstatistik`, `Grundlagen der Inferenzstatistik`, `Wahrscheinlichkeit`, `Zusammenhangsmaße`, `Regression` oder `Poweranalyse`
+#### Numerische Items (`answer_mode = num`)
 
-##### type_item
+Studierende tippen eine Zahl ein; diese wird mit den Antwortoptionen verglichen. Jede Option `XX` (01–06) besteht aus vier Feldern:
 
--   Art des Item (Content items beziehen sich auf inhaltliche Items und coding Items beziehen sich auf R-Inhalte)
--   Mögliche Kategorien: Muss entweder `content` oder `coding` sein
+| Feld | Inhalt |
+|---|---|
+| `answeroption_XX` | Der Zahlenwert, z. B. `6.67` (Punkt oder Komma) |
+| `lower_answeroption_XX` | Untere Grenze des akzeptierten Bereichs (inklusive) |
+| `upper_answeroption_XX` | Obere Grenze des akzeptierten Bereichs (inklusive) |
+| `if_answeroption_XX` | Feedback, wenn die eingegebene Zahl zu dieser Option passt |
 
-#### bloom_taxonony
+Regeln (werden beim Pushen geprüft):
 
--   Einordnung des Items in die Bloom-Taxonomie
--   Mögliche Kategorien: `knowledge`, `comprehension` oder `application`
+1.  **Beide Grenzen leer** → nur der exakte Wert zählt (z. B. für ganze Zahlen, Freiheitsgrade).
+2.  **Beide Grenzen gesetzt** → jede Zahl von `lower` bis `upper` passt. Der Wert selbst muss im Bereich liegen; asymmetrische Bereiche sind erlaubt (z. B. `2.58`–`2.59` für 2,582, um Runden *und* Abschneiden abzudecken).
+3.  **Nur eine Grenze gesetzt** → ungültig.
+4.  **Bereiche verschiedener Optionen dürfen sich nicht überschneiden** (auch nicht an einem einzelnen Punkt), damit jede Eingabe zu höchstens einer Option passt.
+5.  **`answer_correct`**: Nummer(n) der richtigen Option(en), mehrere mit `;` getrennt, z. B. `1;2`. Jede richtige Option hat ihr eigenes Feedback — so können z. B. die Varianz mit *n − 1* und mit *n* beide richtig sein.
+6.  Es gibt **keine Überspringen-Option** (die App hat dafür einen eigenen Button). Nicht benötigte Optionen einfach leer lassen; jede ausgefüllte Option braucht Feedback.
 
-#### theo_diff
+Eine Eingabe, die zu keiner Option passt, wertet die App als „Antwort nicht erkannt“. Falsche Optionen (Distraktoren) sollten daher typische Fehler abbilden, deren Feedback den Fehler erklärt.
 
--   Einschätzung des Schwierigkeitsgrads des Items (subjektiv)
--   Mögliche Kategorien: `easy`, `medium`, `hard`
+**Beispiel** — *„Berechne die Varianz von 2, 4, 6, 8. Runde auf zwei Nachkommastellen.“*, `answer_correct` = `1;2`:
 
-#### stimulus_text
+| # | Wert | lower | upper | richtig | Feedback |
+|---|---|---|---|---|---|
+| 01 | 6.67 | 6.66 | 6.67 | ✓ | Stichprobenvarianz (n − 1) |
+| 02 | 5 | | | ✓ | Populationsvarianz (n) |
+| 03 | 20 | | | ✗ | Quadratsumme, nicht geteilt |
+| 04 | 2.58 | 2.58 | 2.59 | ✗ | Standardabweichung statt Varianz |
 
--   Beschreibung: Der Stimulustext des Items
--   Kann reine Textform sein oder auch HTML-Code oder MD-Code (z.B. für eine kleine Tabelle oder eine Formel) enthalten
-
-#### stimulus_image
-
--   Falls zusätzlich zu dem Stimulustext ein Bild mit in den Stimulus eingefügt werden soll
--   Muss ein Pfad zu einem Bild sein
-
-#### answeroption_01 - answeroption_05
-
--   Felder für die möglichen Antwortoptionen des Items
--   Kann sowohl reine Textform oder ein Pfad zu einem Bild sein
--   Wenn Bilder verwendet wird, muss für *alle* Antwortoptionen Bilder verwendet werden (Text kombiniert mit Bildern ist also derzeit nicht möglich)
--   Es können maximal 5 Antwortoptionen verwendet werden (answeroption_01-05), aber jedoch auch weniger (mind. 3 sollten es jedoch sein aus inhaltlichen Gründen)
-
-#### answeroption_06
-
--   Ist ein Placeholder, wenn Studierende die Aufgabe ohne Bewertung überspringen wollen
--   Kategorien: `Frage überspringen.` für Antwortoptionen mit Textinhalt oder `www/skip.png` für Antwortoptionen, die Bilder enthalten
-
-#### answer_correct
-
--   Beschreibung: Die korrekte Antwort (als Zahl)
--   z.B. wenn die dritte Antwortoption korrekt ist: 3
-
-#### type_stimulus
-
--   Beschreibung: Die Art des Stimulus
--   Kategorie: entweder `text`, wenn das Feld `stimulus_image` leer ist oder `stimulus_image`, wenn ein Bild verwendet wurde im Stimulus
-
-#### type_answer
-
--   Beschreibung: Die Art der Antwortoptionen
--   Kategorie: entweder `text`, wenn für die Felder `answeroption_XX` nur Text verwendet wurde oder `stimulus_image`, wenn ein Bilder verwendet wurden
-
-#### if_answeroption_01 - if_answeroption_05
-
--   Beschreibung: Die Feedbackblöcke für die jeweilige Antwortoption
--   Anzahl an ausgefüllten Feedbackblöcken muss Anzahl der verwendeten Antwortoptionen entsprechen
-
-#### if_answeroption_06
-
--   Beschreibung: Feedbackblock, wenn Item übersprungen wurde
--   Ist bereits vorgegeben und soll nicht verändert werden
-
-### Schritt 3: Überprüfung und Aktualisierung
-
-Die Funktion update_db() dient dazu, ein neu generiertes Item zu validieren und in die bestehende Datenbank einzupflegen.
+### Schritt 3: Validieren und einpflegen
 
 ``` r
-update_db(
-    md_file, 
-    item_folder = "items", 
-    csv_file = "data_item_tiger.csv", 
-    sqlite_file = "db_item.sqlite"
-    )
+push("items/tiger_item_130.md")                  # ein Item
+push("items/tiger_item_130.md", overwrite = TRUE) # bestehendes Item ersetzen (mit Rückfrage)
+push_recent()                                     # alle seit dem letzten Einpflegen geänderten Dateien
+push_all(overwrite = TRUE)                        # alle Item-Dateien
 ```
 
--   `md_file` Die Markdown-Datei des neuen Items (z. B. items/tiger_item_001.md).
+`update_db(md_file)` ist die ältere Variante: prüft ein Item und schreibt dann alle Item-Dateien neu in CSV und Datenbank.
 
--   `item_folder` (default: "items") Der Speicherort der Item-Dateien. Standardwert sollte nicht geändert werden.
-
--   `csv_file` (default: "data_item_tiger.csv") Der Name der CSV-Datei, die die Item-Datenbank enthält. Standardwert sollte nicht geändert werden.
-
--   `sqlite_file` (default: "db_item.sqlite") Der Name der SQLite-Datenbankdatei. Auch hier sollte der Standardwert nicht geändert werden.-
-
-Die Funktion prüft automatisch, ob das Item vollständig und korrekt ist. Wenn Fehler auftreten (z. B. fehlende Felder), wird ein Error ausgegeben. Im Error werden konkrete Hinweise gegeben, was an dem Item geändert werden muss. Das Item muss überarbeitet werden, bevor die Datenbank erneut aktualisiert wird.
-
-### Schritt 4: Finalisierung
-
-Sobald die Funktion `update_db()` erfolgreich durchläuft, wird das Item automatisch in die Datenbank aufgenommen. Der Workflow ist damit abgeschlossen und kann von vorne beginnen.
+**Wie geschrieben wird:** Die CSV-Datei wird komplett neu geschrieben. Die SQLite-Tabelle `item_db` wird dagegen nur *aktualisiert* — geänderte Items per `id_item` überschrieben, neue ergänzt, fehlende Spalten (z. B. die Grenzen für numerische Items) hinzugefügt. Spalten, die tigertools nicht selbst verwaltet (z. B. die IRT-Parameter `irt_*` aus der Kalibrierung), bleiben erhalten. Items, deren Datei gelöscht wurde, bleiben ebenfalls in der Datenbank.

@@ -4,14 +4,16 @@
 \alias{create}
 \title{Create a new Item from the Markdown Template}
 \usage{
-create(open = TRUE, r_file = NULL)
+create(open = TRUE, r_file = NULL, answer_mode = c("mc", "num"))
 }
 \arguments{
 \item{open}{Whether to open the newly created file. Logical vector.}
 
 \item{r_file}{Filename of an R-file (defaults to NULL).}
 
-\item{item_folder}{The folder where the new item should be created. Defaults to "items".}
+\item{answer_mode}{\code{"mc"} (default) for a multiple-choice item, or \code{"num"}
+for a numeric item (students type a number; each answer option has an
+accepted range). The two use different templates.}
 }
 \value{
 Creates a new file based on the Markdown-Template with prefilled \code{id_item}.

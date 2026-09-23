@@ -1,6 +1,6 @@
 Package: tigertools
 Title: Item Template Functionality for shinytigeR Package
-Version: 0.0.0.9000
+Version: 0.1.0
 Authors@R: 
     person("Jan Luca", "Schnatz", , "schnatz@psych.uni-frankfurt.de", role = c("aut", "cre"))
 Description: This package provides item template functionality for the shinytigeR package.
@@ -15,11 +15,9 @@ LazyData: true
 Imports: 
     cli,
     DBI,
-    dplyr,
     here,
     noah,
     parsermd (>= 0.2.0),
-    purrr,
     readr,
     rlang,
     RSQLite,
@@ -27,5 +25,6 @@ Imports:
     stringdist,
     tibble
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3

@@ -9,6 +9,12 @@ validate_item(filename)
 \arguments{
 \item{filename}{The filename of the md-file of the item}
 }
+\value{
+\code{TRUE} (invisibly aborts with an error if a requirement is not met)
+}
 \description{
-Validate a newly created item for correct adherence to formatting
+Checks an item's markdown file against the item rules: the
+shared fields for all items, plus either the multiple-choice rules or the
+numeric-item rules depending on its \code{answer_mode}. Every check prints a
+message; if any check fails, the function aborts at the end.
 }

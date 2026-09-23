@@ -19,12 +19,15 @@ check_folderstruct <- function() {
 }
 
 #' @title Create a new Item from the Markdown Template
-#' @param item_folder The folder where the new item should be created. Defaults to "items".
 #' @param open Whether to open the newly created file. Logical vector.
 #' @param r_file Filename of an R-file (defaults to NULL).
+#' @param answer_mode `"mc"` (default) for a multiple-choice item, or `"num"`
+#'   for a numeric item (students type a number; each answer option has an
+#'   accepted range). The two use different templates.
 #' @return Creates a new file based on the Markdown-Template with prefilled `id_item`.
-#' @export 
-create <- function(open = TRUE, r_file = NULL) {
+#' @export
+create <- function(open = TRUE, r_file = NULL, answer_mode = c("mc", "num")) {
+    answer_mode <- match.arg(answer_mode)
     item_folder <- "items" # Default folder for items
     # Current wd must be where .Rproj file is located and where the items folder is located
     check_folderstruct()
@@ -40,10 +43,10 @@ create <- function(open = TRUE, r_file = NULL) {
    
     # Create the new markdown file from template
     md_filename <- sprintf("%s/tiger_item_%03d.md", item_folder_path, max_digit_exist + 1)
-    writeLines(skeleton, md_filename)
-    item_txt <- readLines(md_filename, warn = FALSE)
-    item_txt_append <- append(item_txt, c(max_digit_exist + 1, ""), grep("learning_area", item_txt) - 1)
-    writeLines(item_txt_append, md_filename)
+    template <- system.file("templates", sprintf("item_%s.md", answer_mode), package = "tigertools")
+    item_txt <- readLines(template, warn = FALSE, encoding = "UTF-8")
+    item_txt <- append(item_txt, as.character(max_digit_exist + 1), after = grep("^# id_item", item_txt)[1])
+    writeLines(enc2utf8(item_txt), md_filename, useBytes = TRUE)
     
     # Handle optional R file creation
     if (!is.null(r_file)) {

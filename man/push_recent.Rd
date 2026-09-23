@@ -4,14 +4,18 @@
 \alias{push_recent}
 \title{Push Recent Items to the Database}
 \usage{
-push_recent()
+push_recent(path = "./items")
+}
+\arguments{
+\item{path}{Path to directory with markdown files (default: "./items")}
 }
 \value{
 Invisibly returns \code{NULL}.
 }
 \description{
-Pushes Markdown files modified more recently than the database file.
-Only files newer than the database are pushed without overwrite confirmation.
+Pushes Markdown files modified more recently than the database
+file. Existing items among them are overwritten without confirmation (a
+newer file is taken as an intended edit).
 }
 \seealso{
 \code{\link{push}} to push a single file.
