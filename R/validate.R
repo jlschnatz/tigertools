@@ -101,24 +101,24 @@ validate_sections <- function(filename) {
 
 # -- Multiple-choice items ----------------------------------------------------
 
+# Skipping is a button in the app, not an answer option: the old skip
+# pseudo-option of earlier item files must not come back into the DB.
 #' @noRd
 validate_answeroption <- function(x) {
-  skip <- c(text = "Frage \u00FCberspringen.", image = "www/skip.png")
-  if (!x$type_answer %in% names(skip)) {
-    return(FALSE) # type_answer itself is reported by validate_str()
-  }
-  if (identical(x$answeroption_06, skip[[x$type_answer]])) {
-    .pass("Input for variable {.field answeroption_06} correct.")
+  skip <- c("Frage \u00FCberspringen.", "www/skip.png")
+  opts <- sprintf("answeroption_%02d", 1:6)
+  hit <- opts[unlist(x[, opts]) %in% skip]
+  if (length(hit) > 0L) {
+    .fail("{.field {hit}} contains the old skip option. Skipping is a button in the app now, please leave this option and its feedback empty.")
   } else {
-    expected <- skip[[x$type_answer]] # nolint
-    .fail("Input for variable {.field answeroption_06} incorrect. Based on variable {.field type_answer} = {.str {x$type_answer}}, it should have the following value: {.str {expected}}")
+    .pass("No skip option among the answer options.")
   }
 }
 
 #' @noRd
 validate_answer_correct <- function(x) {
   answer_correct <- suppressWarnings(as.numeric(x$answer_correct))
-  n_answer <- sum(!is.na(unlist(x[, paste0("answeroption_0", 1:5)])))
+  n_answer <- sum(!is.na(unlist(x[, sprintf("answeroption_%02d", 1:6)])))
   error_case <- is.na(answer_correct) || !rlang::is_integerish(answer_correct) || answer_correct < 1 || answer_correct > n_answer
   if (error_case) {
     .fail("Input for variable {.field answer_correct} incorrect. Must be the index (a single integer) of the correct answer option (1-{n_answer}).")
@@ -129,18 +129,12 @@ validate_answer_correct <- function(x) {
 
 #' @noRd
 validate_if_answeroption <- function(x) {
-  ok <- TRUE
-  if (!identical(x$if_answeroption_06, "Alles klar! Du hast die Aufgabe \u00FCbersprungen.")) {
-    ok <- .fail("Input for variable {.field if_answeroption_06} must remain unchanged, please select {.str Alles klar! Du hast die Aufgabe \u00FCbersprungen.}")
-  } else {
-    .pass("Input for variable {.field if_answeroption_06} corresponds to formalities.")
-  }
-  n_answer <- sum(!is.na(unlist(x[, paste0("answeroption_0", 1:5)])))
-  n_if_answer <- sum(!is.na(unlist(x[, paste0("if_answeroption_0", 1:5)])))
+  n_answer <- sum(!is.na(unlist(x[, sprintf("answeroption_%02d", 1:6)])))
+  n_if_answer <- sum(!is.na(unlist(x[, sprintf("if_answeroption_%02d", 1:6)])))
   if (n_answer != n_if_answer) {
     .fail("{n_answer} fields for {.field answer_option} have been filled out, but {n_if_answer} fields for {.field if_answeroption}. These must be identical!")
   } else {
-    .pass("The number of answer options corresponds to the number of feedback blocks.") && ok
+    .pass("The number of answer options corresponds to the number of feedback blocks.")
   }
 }
 

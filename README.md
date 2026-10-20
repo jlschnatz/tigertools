@@ -53,11 +53,11 @@ create(answer_mode = "num")            # numerisches Item
 
 #### Multiple-Choice-Items (`answer_mode = mc`)
 
-- `answeroption_01` – `answeroption_05`: Antwortoptionen (Text oder Bildpfad; wenn Bilder, dann für _alle_ Optionen). Mindestens 3 sind inhaltlich sinnvoll, maximal 5.
-- `answeroption_06`: Platzhalter zum Überspringen — `Frage überspringen.` (Text) bzw. `www/skip.png` (Bilder).
+- `answeroption_01` – `answeroption_06`: Antwortoptionen (Text oder Bildpfad; wenn Bilder, dann für _alle_ Optionen). Mindestens 3 sind inhaltlich sinnvoll, maximal 6; nicht benötigte Optionen leer lassen.
+- Es gibt **keine Überspringen-Option** (die App hat dafür einen eigenen Button). Das frühere `Frage überspringen.` bzw. `www/skip.png` wird beim Pushen abgelehnt.
 - `answer_correct`: Nummer der **einen** richtigen Option, z. B. `3`.
 - `type_answer`: `text` oder `image`.
-- `if_answeroption_01` – `05`: Feedback je Option (Anzahl muss der Anzahl der Optionen entsprechen); `if_answeroption_06` bleibt unverändert.
+- `if_answeroption_01` – `06`: Feedback je Option (Anzahl muss der Anzahl der Optionen entsprechen).
 
 #### Numerische Items (`answer_mode = num`)
 
