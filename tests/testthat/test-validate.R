@@ -21,11 +21,22 @@ test_that("categorical fields must match a category, with a suggestion for typos
   expect_invalid(mc_item_fields(type_stimulus = "video"))
 })
 
-test_that("MC skip option and skip feedback must match the template", {
-  expect_invalid(mc_item_fields(answeroption_06 = "Weiter"))
-  expect_invalid(mc_item_fields(type_answer = "image")) # needs www/skip.png
+test_that("MC items must not contain the old skip option (skipping is an app button)", {
+  skip_fb <- "Alles klar! Du hast die Aufgabe übersprungen."
+  expect_invalid(mc_item_fields(answeroption_06 = "Frage überspringen.", if_answeroption_06 = skip_fb))
+  expect_invalid(mc_item_fields(answeroption_04 = "www/skip.png", if_answeroption_04 = skip_fb))
   expect_invalid(mc_item_fields(type_answer = "audio"))
-  expect_invalid(mc_item_fields(if_answeroption_06 = "Übersprungen."))
+})
+
+test_that("MC items may use all six answer options", {
+  six <- mc_item_fields(
+    answeroption_04 = "6", answeroption_05 = "-3", answeroption_06 = "1/2",
+    if_answeroption_04 = "a", if_answeroption_05 = "b", if_answeroption_06 = "c",
+    answer_correct = "6"
+  )
+  expect_valid(six)
+  expect_invalid(utils::modifyList(six, list(if_answeroption_06 = "NA")))
+  expect_invalid(utils::modifyList(six, list(answer_correct = "7")))
 })
 
 test_that("MC answer_correct must point to an existing option", {

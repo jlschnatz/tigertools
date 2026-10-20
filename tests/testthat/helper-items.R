@@ -49,14 +49,13 @@ mc_item_fields <- function(...) {
     stimulus_text = "Was ist die Steigung von y = 2x + 3?",
     stimulus_image = "NA",
     answeroption_01 = "2", answeroption_02 = "3", answeroption_03 = "5",
-    answeroption_04 = "NA", answeroption_05 = "NA",
-    answeroption_06 = "Frage überspringen.",
+    answeroption_04 = "NA", answeroption_05 = "NA", answeroption_06 = "NA",
     answer_correct = "1",
     type_stimulus = "text",
     type_answer = "text",
     if_answeroption_01 = "Richtig.", if_answeroption_02 = "Achsenabschnitt.",
     if_answeroption_03 = "Summe.", if_answeroption_04 = "NA", if_answeroption_05 = "NA",
-    if_answeroption_06 = "Alles klar! Du hast die Aufgabe übersprungen."
+    if_answeroption_06 = "NA"
   )
   utils::modifyList(base, list(...))
 }

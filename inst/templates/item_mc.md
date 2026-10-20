@@ -76,12 +76,8 @@ hier ein Pfad für das Bild eingefügt werden. (ansonsten auslassen)
 # answeroption_06
 
 <!---
-String (ohne Anführungszeichen):
-    - "Frage überspringen."
-    - "www/skip.png"
-  
-Wenn type_answer: `text`, dann "Frage überspringen"
-Wenn type_answer: `image`, dann "www/skip.png"
+Nicht benötigte Antwortoptionen einfach leer lassen. Keine "Überspringen"-Option
+eintragen (dafür gibt es in der App einen eigenen Button).
 --->
 
 # answer_correct
@@ -139,8 +135,6 @@ Die `if_answeroption_XX` Felder müssen das Feedback für die ausgewählte Antwo
 
 # if_answeroption_06
 
-<!--
-Bitte so lassen.
--->
-
-Alles klar! Du hast die Aufgabe übersprungen.
+<!---
+Die `if_answeroption_XX` Felder müssen das Feedback für die ausgewählte Antwortoption XX enthalten.
+--->
