@@ -69,7 +69,3 @@ create <- function(open = TRUE, r_file = NULL, answer_mode = c("mc", "num")) {
     }
     cli::cli_alert_success("New markdown file created at {.file {md_filename}}")
 }
-
-
-
-
