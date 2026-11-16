@@ -99,6 +99,4 @@ push_recent()                                     # alle seit dem letzten Einpfl
 push_all(overwrite = TRUE)                        # alle Item-Dateien
 ```
 
-`update_db(md_file)` ist die ältere Variante: prüft ein Item und schreibt dann alle Item-Dateien neu in CSV und Datenbank.
-
 **Wie geschrieben wird:** Die CSV-Datei wird komplett neu geschrieben. Die SQLite-Tabelle `item_db` wird dagegen nur *aktualisiert* — geänderte Items per `id_item` überschrieben, neue ergänzt, fehlende Spalten (z. B. die Grenzen für numerische Items) hinzugefügt. Spalten, die tigertools nicht selbst verwaltet (z. B. die IRT-Parameter `irt_*` aus der Kalibrierung), bleiben erhalten. Items, deren Datei gelöscht wurde, bleiben ebenfalls in der Datenbank.
