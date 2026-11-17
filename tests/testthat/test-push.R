@@ -83,3 +83,39 @@ test_that("push_recent() pushes only files newer than the database", {
   suppressMessages(push_recent())
   expect_true(998L %in% .read_item_csv("data_item_tiger.csv")$id_item)
 })
+
+read_item_db <- function(path = "db_item.sqlite") {
+  con <- DBI::dbConnect(RSQLite::SQLite(), path)
+  on.exit(DBI::dbDisconnect(con))
+  DBI::dbReadTable(con, "item_db")
+}
+
+test_that("push_all() pushes every item file; without overwrite it stops at the first existing item", {
+  root <- create_mockstruct()
+  withr::defer(unlink(root, recursive = TRUE))
+  withr::local_dir(root)
+  write_item_md(num_item_fields(id_item = "995"), path = "items/tiger_item_995.md")
+  md_ids <- as.integer(sub("tiger_item_(\\d+)\\.md", "\\1", list.files("items", "\\.md$")))
+
+  expect_error(suppressMessages(push_all()), "already exists")
+
+  suppressMessages(push_all(overwrite = TRUE))
+  csv <- .read_item_csv("data_item_tiger.csv")
+  expect_true(all(md_ids %in% csv$id_item))
+  expect_false(anyDuplicated(csv$id_item) > 0)
+  expect_true(995L %in% read_item_db()$id_item)
+})
+
+test_that("parse_csv_to_md() writes item files that parse back to the same item", {
+  root <- withr::local_tempdir()
+  withr::local_dir(root)
+  dir.create("items")
+  src <- write_item_md(num_item_fields(id_item = "7"))
+  item <- .as_item_schema(parse_md_to_csv(src))
+
+  suppressMessages(parse_csv_to_md(item))
+  expect_true(file.exists("items/tiger_item_007.md"))
+  back <- .as_item_schema(parse_md_to_csv("items/tiger_item_007.md"))
+  expect_equal(back, item, ignore_attr = TRUE)
+  expect_true(suppressMessages(validate_item("items/tiger_item_007.md")))
+})

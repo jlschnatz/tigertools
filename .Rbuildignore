@@ -6,3 +6,6 @@
 ^\.Rprofile$
 ^\.lintr$
 ^dev$
+^rproject\.toml$
+^rv\.lock$
+^rv$

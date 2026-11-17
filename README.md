@@ -100,3 +100,21 @@ push_all(overwrite = TRUE)                        # alle Item-Dateien
 ```
 
 **Wie geschrieben wird:** Die CSV-Datei wird komplett neu geschrieben. Die SQLite-Tabelle `item_db` wird dagegen nur *aktualisiert* — geänderte Items per `id_item` überschrieben, neue ergänzt, fehlende Spalten (z. B. die Grenzen für numerische Items) hinzugefügt. Spalten, die tigertools nicht selbst verwaltet (z. B. die IRT-Parameter `irt_*` aus der Kalibrierung), bleiben erhalten. Items, deren Datei gelöscht wurde, bleiben ebenfalls in der Datenbank.
+
+### Schritt 4: Pool für die App bauen
+
+```r
+build_release(
+  out_dir     = "release",                     # db_item.sqlite + img_item/
+  calibrated  = "difficulty/calibrated.csv",   # Schwierigkeiten aus der IRT-Kalibrierung
+  provisional = "difficulty/provisional.csv"   # vorläufige Schätzungen für neue Items
+)
+```
+
+Baut `db_item.sqlite` und `img_item/` für shinytigeR **komplett neu** aus den Item-Dateien, nicht aus der Datenbank von `push()`: Jedes Item wird geprüft (alle fehlerhaften Dateien werden auf einmal gemeldet), die Schwierigkeiten werden ergänzt und die verwendeten Bilder kopiert. Gleiche Eingaben ergeben eine identische Datei; gelöschte Item-Dateien fehlen im Pool.
+
+- Eine kalibrierte Schwierigkeit hat Vorrang (`irt_provisional = 0`), sonst gilt die vorläufige (`irt_provisional = 1`).
+- Ein Item ohne Schwierigkeit bricht den Build ab (`allow_missing = TRUE` baut trotzdem; das Item zählt dann nicht zur Fähigkeitsschätzung).
+- Die CSV-Dateien brauchen eine ID-Spalte (`id_item` oder `item_id`) und eine Schwierigkeitsspalte (`irt_diff`, `difficulty_median` oder `difficulty_logit`).
+- Die Tabelle `build_info` im Pool hält fest, aus welchen Eingaben (MD5) er gebaut wurde.
+- `out_dir` ist ein eigener Ordner, nicht der DB-Ordner der App: Von dort kopieren, danach in shinytigeR `dev/check_deploy_dbs.R` laufen lassen.
