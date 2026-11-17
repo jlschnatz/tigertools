@@ -20,8 +20,10 @@
 #'   `irt_diff = NULL` and don't count towards the app's estimate).
 #'
 #'   The pool gets a second table, `build_info`, with an md5 hash of each input
-#'   (the item files and images together count as one), so a pool on the
-#'   server can be traced back to what it was built from. It holds no date:
+#'   (the item files and images together count as one) and the tigertools
+#'   version that built it (with its git commit when installed by rv from
+#'   GitHub), so a pool on the server can be traced back to what it was built
+#'   from. It holds no date:
 #'   building twice from the same inputs gives an identical file.
 #'
 #'   `out_dir` must be a folder for the build only (it replaces its
@@ -106,14 +108,19 @@ build_release <- function(out_dir = "./release",
   types[["irt_provisional"]] <- "INTEGER"
   DBI::dbWriteTable(con, "item_db", items, field.types = types)
   DBI::dbWriteTable(con, "build_info", data.frame(
-    input = c("items", "calibrated", "provisional"),
-    file = c(basename(normalizePath(path)), basename(calibrated), if (is.null(provisional)) NA else basename(provisional)),
+    input = c("items", "calibrated", "provisional", "tigertools"),
+    file = c(
+      basename(normalizePath(path)), basename(calibrated),
+      if (is.null(provisional)) NA else basename(provisional),
+      .tigertools_ref()
+    ),
     md5 = c(
       .md5_combined(c(files, img_src)),
       unname(tools::md5sum(calibrated)),
-      if (is.null(provisional)) NA else unname(tools::md5sum(provisional))
+      if (is.null(provisional)) NA else unname(tools::md5sum(provisional)),
+      NA
     ),
-    n_items = c(nrow(items), n_cal, n_prov)
+    n_items = c(nrow(items), n_cal, n_prov, NA)
   ))
   DBI::dbDisconnect(con)
   if (length(imgs) > 0L && !all(file.copy(img_src, file.path(tmp, "img_item", imgs)))) {
@@ -198,6 +205,19 @@ build_release <- function(out_dir = "./release",
   cols <- intersect(c("stimulus_image", sprintf("answeroption_%02d", 1:6)), names(items))
   vals <- unlist(items[cols], use.names = FALSE)
   sort(unique(basename(vals[!is.na(vals) & grepl("^www/.*\\.(jpe?g|png|gif|bmp|tiff|webp|svg)$", vals, ignore.case = TRUE)])))
+}
+
+# The tigertools version that builds the pool: "0.1.0 @ f5c951e" when installed
+# by rv from GitHub (rv writes the commit to .rv.metadata in the package
+# folder), else just the version (e.g. a pkgload::load_all() during
+# development).
+#' @noRd
+.tigertools_ref <- function() {
+  version <- as.character(utils::packageVersion("tigertools"))
+  meta <- system.file(".rv.metadata", package = "tigertools")
+  txt <- if (nzchar(meta)) paste(readLines(meta, warn = FALSE), collapse = "") else ""
+  sha <- regmatches(txt, regexpr("[0-9a-f]{40}", txt))
+  if (length(sha) == 1L) paste(version, "@", substr(sha, 1, 7)) else version
 }
 
 # One md5 over several files (their names and contents, order-independent).

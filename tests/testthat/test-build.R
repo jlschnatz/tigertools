@@ -78,8 +78,9 @@ test_that("build_release is reproducible and records its inputs", {
   expect_equal(unname(tools::md5sum("a/db_item.sqlite")), unname(tools::md5sum("b/db_item.sqlite")))
 
   info <- read_pool("a/db_item.sqlite", "build_info")
-  expect_equal(info$input, c("items", "calibrated", "provisional"))
-  expect_equal(info$n_items, c(3, 2, 1))
+  expect_equal(info$input, c("items", "calibrated", "provisional", "tigertools"))
+  expect_equal(info$n_items, c(3, 2, 1, NA))
+  expect_match(info$file[4], "^\\d+\\.\\d+\\.\\d+")
 
   # changing an item changes the items hash
   write_item_md(mc_item_fields(id_item = "2", stimulus_text = "Anders."), path = "items/tiger_item_002.md")

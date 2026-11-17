@@ -52,8 +52,10 @@ else the build stops (unless \code{allow_missing = TRUE}; those items get
 \code{irt_diff = NULL} and don't count towards the app's estimate).
 
 The pool gets a second table, \code{build_info}, with an md5 hash of each input
-(the item files and images together count as one), so a pool on the
-server can be traced back to what it was built from. It holds no date:
+(the item files and images together count as one) and the tigertools
+version that built it (with its git commit when installed by rv from
+GitHub), so a pool on the server can be traced back to what it was built
+from. It holds no date:
 building twice from the same inputs gives an identical file.
 
 \code{out_dir} must be a folder for the build only (it replaces its

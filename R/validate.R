@@ -270,7 +270,10 @@ validate_answer_correct_num <- function(x) {
 #'   numeric-item rules depending on its `answer_mode`. Every check prints a
 #'   message; if any check fails, the function aborts at the end.
 #' @param filename The filename of the md-file of the item
+#'   Run it from the item project folder (image paths are checked against
+#'   `items/www/`).
 #' @return `TRUE` (invisibly aborts with an error if a requirement is not met)
+#' @export
 validate_item <- function(filename) {
   validate_file_header(filename)
   checks <- list(validate_sections(filename))

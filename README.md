@@ -116,5 +116,5 @@ Baut `db_item.sqlite` und `img_item/` für shinytigeR **komplett neu** aus den I
 - Eine kalibrierte Schwierigkeit hat Vorrang (`irt_provisional = 0`), sonst gilt die vorläufige (`irt_provisional = 1`).
 - Ein Item ohne Schwierigkeit bricht den Build ab (`allow_missing = TRUE` baut trotzdem; das Item zählt dann nicht zur Fähigkeitsschätzung).
 - Die CSV-Dateien brauchen eine ID-Spalte (`id_item` oder `item_id`) und eine Schwierigkeitsspalte (`irt_diff`, `difficulty_median` oder `difficulty_logit`).
-- Die Tabelle `build_info` im Pool hält fest, aus welchen Eingaben (MD5) er gebaut wurde.
+- Die Tabelle `build_info` im Pool hält fest, aus welchen Eingaben (MD5) und mit welcher tigertools-Version (inkl. Git-Commit) er gebaut wurde.
 - `out_dir` ist ein eigener Ordner, nicht der DB-Ordner der App: Von dort kopieren, danach in shinytigeR `dev/check_deploy_dbs.R` laufen lassen.
