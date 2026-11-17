@@ -49,10 +49,13 @@
   )
 }
 
-# "6,67" -> "6.67" (German decimal comma), trimmed; NA stays NA.
+# "6,67" -> "6.67" (German decimal comma), trimmed; NA stays NA. A leading
+# "\-" becomes "-": visual markdown editors (RStudio/Positron) escape a minus
+# at the start of a line, so a negative value "-1.13" is saved as "\-1.13".
 #' @noRd
 .normalize_decimal <- function(x) {
   x <- trimws(as.character(x))
+  x <- sub("^\\\\-", "-", x)
   gsub(",", ".", x, fixed = TRUE)
 }
 

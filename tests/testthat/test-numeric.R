@@ -15,6 +15,17 @@ test_that("decimal commas are accepted and normalized to dots", {
   expect_equal(x$upper_answeroption_01, 6.67)
 })
 
+test_that("a minus escaped by a visual markdown editor (\\-) is read as a minus", {
+  f <- write_item_md(num_item_fields(
+    answeroption_04 = "\\-2.58", lower_answeroption_04 = "\\-2.59", upper_answeroption_04 = "\\-2,58"
+  ))
+  expect_true(suppressMessages(validate_item(f)))
+  x <- .as_item_schema(parse_md_to_csv(f))
+  expect_equal(x$answeroption_04, "-2.58")
+  expect_equal(x$lower_answeroption_04, -2.59)
+  expect_equal(x$upper_answeroption_04, -2.58)
+})
+
 test_that("rule 1: options without bounds are fine (exact match)", {
   expect_valid(num_item_fields(
     lower_answeroption_01 = "", upper_answeroption_01 = "",
